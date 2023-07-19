@@ -30,7 +30,7 @@ namespace api.Controllers
 
                 var stories = await _newsService.ListBestStories(request.SkipCount, request.MaxCount);
 
-                return Ok(stories);
+                return Ok(stories.Select(x => new StoryResponse(x)).ToArray());
             }
             catch (Exception ex)
             {

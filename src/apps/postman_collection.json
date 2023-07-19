@@ -25,13 +25,13 @@
 			"response": []
 		},
 		{
-			"name": "Health Copy",
+			"name": "BestStories",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"MaxCount\": 1,\r\n    \"Skip\":0\r\n}",
+					"raw": "{\r\n    \"MaxCount\": 4,\r\n    \"Skip\":0\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -49,7 +49,57 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"name": "BestStories",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"MaxCount\": 4,\r\n    \"Skip\":0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hn_api_url}}/News/BestStories",
+							"host": [
+								"{{hn_api_url}}"
+							],
+							"path": [
+								"News",
+								"BestStories"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "846"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 19 Jul 2023 15:54:33 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Kestrel"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"title\": \"Llama 2\",\n        \"uri\": \"https://ai.meta.com/llama/\",\n        \"postedBy\": \"friggeri\",\n        \"time\": \"2023-07-18T16:01:49+00:00\",\n        \"score\": 2196,\n        \"commentCount\": 785\n    },\n    {\n        \"title\": \"Firefox has surpassed Chrome on Speedometer\",\n        \"uri\": \"https://treeherder.mozilla.org/perfherder/graphs?timerange=31536000&series=mozilla-central,3735773,1,13&series=mozilla-central,3412459,1,13\",\n        \"postedBy\": \"akyuu\",\n        \"time\": \"2023-07-18T12:00:21+00:00\",\n        \"score\": 1223,\n        \"commentCount\": 511\n    },\n    {\n        \"title\": \"A Firefox-only minimap (2021)\",\n        \"uri\": \"https://www.stefanjudis.com/a-firefox-only-minimap/\",\n        \"postedBy\": \"sph\",\n        \"time\": \"2023-07-17T12:44:09+00:00\",\n        \"score\": 682,\n        \"commentCount\": 113\n    },\n    {\n        \"title\": \"Refusing to teach kids math will not improve equity\",\n        \"uri\": \"https://www.noahpinion.blog/p/refusing-to-teach-kids-math-will\",\n        \"postedBy\": \"bankershill\",\n        \"time\": \"2023-07-18T16:18:30+00:00\",\n        \"score\": 657,\n        \"commentCount\": 691\n    }\n]"
+				}
+			]
 		}
 	],
 	"variable": [

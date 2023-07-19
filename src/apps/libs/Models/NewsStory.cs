@@ -1,6 +1,4 @@
-﻿using libs.Converters;
-using Newtonsoft.Json;
-using System.ComponentModel;
+﻿using Newtonsoft.Json;
 
 namespace libs.Models
 {
@@ -9,24 +7,19 @@ namespace libs.Models
     /// </summary>
     public class NewsStory
     {
-        [JsonProperty("id")]
-        public string StoryId { get; set; }
-
-        [JsonProperty("by")]
+        [JsonProperty("by")]        
         public string PostedBy { get; set; }
 
-        [JsonProperty("descendants")]
-        public int DescendantCount { get; set; }
+        [JsonProperty("descendants")]        
+        public int CommentCount { get; set; }
 
-        public int CommentCount { get { return DescendantCount; } }
-
+        
         [JsonProperty("kids")]
         public int[] ChildIds { get; set; }
         
         public int Score { get; set; }
 
         [JsonProperty("time")]
-        [JsonConverter(typeof(TimeConverter))]
         public int PublishedOn { get; set; }
 
         public string Title { get; set; }
@@ -34,7 +27,7 @@ namespace libs.Models
         [JsonProperty("type")]
         public string ItemType { get; set; }
 
-        [JsonProperty("uri")]
+        [JsonProperty("url")]
         public string Url { get; set; }
     }
 }
