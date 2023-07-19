@@ -7,6 +7,9 @@ namespace libs.Models
     /// </summary>
     public class NewsStory
     {
+        
+        public int Id { get; set; }
+
         [JsonProperty("by")]        
         public string PostedBy { get; set; }
 
@@ -29,5 +32,6 @@ namespace libs.Models
 
         [JsonProperty("url")]
         public string Url { get; set; }
+        
     }
 }

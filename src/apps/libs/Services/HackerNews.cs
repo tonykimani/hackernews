@@ -1,5 +1,8 @@
-﻿using libs.Contracts;
+﻿using libs.Constants;
+using libs.contracts;
+using libs.Contracts;
 using libs.Models;
+using libs.Utils;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -11,12 +14,12 @@ namespace api.Services
     public class HackerNewsService : INewsService
     {
         private readonly HttpClient _httpClient;
-        private readonly JsonSerializerSettings _serializerSettings;
-
-        public HackerNewsService(HttpClient httpClient)
+        private readonly ICache _cache;
+        
+        public HackerNewsService(HttpClient httpClient, ICache cache)
         {
             _httpClient = httpClient;
-            _serializerSettings = new JsonSerializerSettings();
+            _cache = cache;
         }
 
         /// <summary>
@@ -43,46 +46,34 @@ namespace api.Services
             return false;
         }
 
-        public async Task<NewsStory[]> ListBestStories(int? skipCount, int? maxCount = 100)
+        public async Task<int[]> ListBestStoryIds()
         {
-            var stories = new List<NewsStory>();
-
             try
             {
-                var response = await _httpClient.GetAsync("v0/beststories.json");
+                var storyIdsJson = _cache.GetKey(KeyNames.STORIES);
 
-                if (response.IsSuccessStatusCode)
+                if (string.IsNullOrEmpty(storyIdsJson))
                 {
-                    var content = await response.Content.ReadAsStringAsync();
+                    var response = await _httpClient.GetAsync("v0/beststories.json");
 
-                    var results = JsonConvert.DeserializeObject<IEnumerable<int>>(content, _serializerSettings);
-
-                    if (skipCount != null)
+                    if (response.IsSuccessStatusCode)
                     {
-                        results = results.Skip(skipCount.Value);
-                    }
+                        storyIdsJson = await response.Content.ReadAsStringAsync();
 
-                    if (maxCount != null)
+                        var hoursToUTCMidnight = (DateTimeOffset.UtcNow.Midnight() - DateTimeOffset.UtcNow);
+
+                        await _cache.SetKey(KeyNames.STORIES, storyIdsJson, hoursToUTCMidnight);
+                        
+                    }
+                    else
                     {
-                        results = results.Take(maxCount.Value);
+                        Log.Warning($"Unable to get best stories from url {response.RequestMessage.RequestUri} because {response.StatusCode} {response.ReasonPhrase}");
+
+                        storyIdsJson = "[]";
                     }
-
-                    foreach (var storyId in results)
-                    {
-                        var story = await GetStory(storyId);
-
-                        if (story != null)
-                        {
-                            stories.Add(story);
-                        }
-
-                    }
-
                 }
-                else
-                {
-                    Log.Warning($"Unable to get best stories from url {response.RequestMessage.RequestUri} because {response.StatusCode} {response.ReasonPhrase}");
-                }
+
+                return JsonConvert.DeserializeObject<int[]>(storyIdsJson).Or<int[]>(Array.Empty<int>());
 
             }
             catch (Exception ex)
@@ -91,7 +82,7 @@ namespace api.Services
             }
 
 
-            return stories.OrderByDescending(story => story.Score).ToArray();
+            return new int[] { }; 
         }
 
         /// <summary>
@@ -103,18 +94,29 @@ namespace api.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync($"v0/item/{storyId}.json");
+                var storyCacheId = $"{KeyNames.STORY_PREFIX}{storyId}";
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
+                var storyJson = _cache.GetKey(storyCacheId);
 
-                    return  JsonConvert.DeserializeObject<NewsStory>(content, _serializerSettings);
-                }
-                else
+                if (storyJson == null)
                 {
-                    Log.Warning($"Unable to get story {storyId} from url {response.RequestMessage.RequestUri} because {response.StatusCode} {response.ReasonPhrase}");
+                    var response = await _httpClient.GetAsync($"v0/item/{storyId}.json");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        storyJson = await response.Content.ReadAsStringAsync();
+
+                        await _cache.SetKey(KeyNames.STORIES, storyJson, TimeSpan.FromDays(7));
+                    }
+                    else
+                    {
+                        Log.Warning($"Unable to get story {storyId} from url {response.RequestMessage.RequestUri} because {response.StatusCode} {response.ReasonPhrase}");
+
+                        storyJson = "{}";
+                    }
                 }
+
+                return JsonConvert.DeserializeObject<NewsStory>(storyJson);
 
             }
             catch (Exception ex)

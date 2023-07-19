@@ -1,4 +1,5 @@
-﻿using libs.Contracts;
+﻿using libs.contracts;
+using libs.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
@@ -12,10 +13,12 @@ namespace api.Controllers
     public class HealthController : ControllerBase
     {
         private readonly INewsService _newsService;
+        private readonly ICache _cache;
 
-        public HealthController(INewsService newsService)
+        public HealthController(INewsService newsService, ICache cache)
         {
             _newsService = newsService;
+            _cache = cache;
         }
 
         /// <summary>
@@ -36,12 +39,18 @@ namespace api.Controllers
                     return BadRequest();
                 }
 
+                var cacheAvailable = await _cache.Ping();
+                if (!cacheAvailable)
+                {
+                    return BadRequest();
+                }
+
                 return Ok();
 
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed while greeting.{ex.Message}.{ex.StackTrace}", ex);
+                Log.Error($"Failed while checking dependency upness.{ex.Message}.{ex.StackTrace}", ex);
 
                 return BadRequest();
             }

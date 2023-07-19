@@ -14,12 +14,10 @@ namespace libs.Contracts
         Task<bool> Ping();
 
         /// <summary>
-        /// Get a list of the best stories
+        /// Get a list of the best story ids
         /// </summary>
-        /// <param name="skipCount">If paging results this is the count already returned in previuous calls</param>
-        /// <param name="maxCount">Maximum number of stories to return. If paging results this is the page size</param>
         /// <returns></returns>
-        Task<NewsStory[]> ListBestStories(int? skipCount, int? maxCount = 100);
+        Task<int[]> ListBestStoryIds();
 
         /// <summary>
         /// Get a particular story (or null if not found)

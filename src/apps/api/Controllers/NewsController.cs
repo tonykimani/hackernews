@@ -1,7 +1,12 @@
 using api.Models.Requests;
 using api.Models.Responses;
+using libs.Constants;
+using libs.contracts;
 using libs.Contracts;
+using libs.Models;
+using libs.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Serilog;
 namespace api.Controllers
 {
@@ -10,11 +15,13 @@ namespace api.Controllers
     public class NewsController : ControllerBase
     {
         private readonly INewsService _newsService;
+        private readonly ICache _cache;
         private readonly int _maxMaxCount;
 
-        public NewsController(INewsService newsService, IConfiguration configuration)
+        public NewsController(INewsService newsService, ICache cache, IConfiguration configuration)
         {
             _newsService = newsService;
+            _cache = cache;
             _maxMaxCount = configuration.GetValue("MAX_STORY_COUNT", 100);
         }
 
@@ -28,9 +35,20 @@ namespace api.Controllers
                     return BadRequest(new ErrorResponse { Code="100", Message = "MaxCount threshold exceeded." });
                 }
 
-                var stories = await _newsService.ListBestStories(request.SkipCount, request.MaxCount);
+                var stories = new List<StoryResponse>();
+                var storyids = await _newsService.ListBestStoryIds();
 
-                return Ok(stories.Select(x => new StoryResponse(x)).ToArray());
+                foreach(var storyid in storyids.Skip(request.SkipCount).Take(request.MaxCount))
+                {
+                    var story = await _newsService.GetStory(storyid);
+                    if (story != null)
+                    {
+                        stories.Add(new StoryResponse(story));
+                    }
+                }
+
+                return Ok(stories.OrderByDescending(story => story.Score));
+                 
             }
             catch (Exception ex)
             {
