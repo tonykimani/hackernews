@@ -1,0 +1,61 @@
+{
+	"info": {
+		"_postman_id": "ccc512ed-1877-43a6-b0da-bae05d8d99b4",
+		"name": "HackerNewsHelper",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19823127"
+	},
+	"item": [
+		{
+			"name": "Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{hn_api_url}}/Health/Hello",
+					"host": [
+						"{{hn_api_url}}"
+					],
+					"path": [
+						"Health",
+						"Hello"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Health Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"MaxCount\": 1,\r\n    \"Skip\":0\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{hn_api_url}}/News/BestStories",
+					"host": [
+						"{{hn_api_url}}"
+					],
+					"path": [
+						"News",
+						"BestStories"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "hn_api_url",
+			"value": "http://localhost:5134"
+		}
+	]
+}
