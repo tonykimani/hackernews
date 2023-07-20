@@ -14,9 +14,9 @@ The API uses Redis cache to cache results from HackerNews. The best story id lis
 
 1. navigate to the /src/apps/api folder
 2. open a command window
-3. run `docker-compose up --build` (this will build the image, run unit tests and launch the container)
+3. run `docker-compose up --build` (this will build the image, run unit tests and launch the container). It takes a couple of minutes depending on your OS/machine.
 4. on your browser navigate to `http://localhost:5134` . You should see the swagger doc when it's finished loading.
-5. open Postman and load the collection in the /src/apps folder.
+5. open Postman and load the collection in the /src/apps folder to see examples of the calls.
 
 # Debugging
 
