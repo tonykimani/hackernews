@@ -10,12 +10,17 @@ This is a REST API written in C# 7.0. The API runs in a docker container on Linu
 
 The API uses Redis cache to cache results from HackerNews. The best story id list is cached until midnight and stories are kept for 7 days before being cleared. This should reduce the hits on HackerNews.
 
+# Prerequisites
+
+1. Docker - https://docs.docker.com/engine/install/
+2. Postman - https://www.postman.com/downloads/
+
 # Installation
 
 1. navigate to the /src/apps/api folder
 2. open a command window
 3. run `docker-compose up --build` (this will build the image, run unit tests and launch the container). It takes a couple of minutes depending on your OS/machine.
-4. on your browser navigate to `http://localhost:5134` . You should see the swagger doc when it's finished loading.
+4. wait for the `src-api-1 | [HH:MM:SS INF] Starting up API..` log on the console output then on your browser navigate to `http://localhost:5134` to see the swagger doc.
 5. open Postman and load the collection in the /src/apps folder to see examples of the calls.
 
 # Debugging
@@ -28,6 +33,7 @@ The API uses Redis cache to cache results from HackerNews. The best story id lis
 
 1. If the default port is already in use , you can change it to a free port in the docker-compose file described above.
 2. If the container keeps exiting it could be because redis is already running your machine. In that case, you can change the host port number in the docker compose and suffix the REDIS_SERVER environment variable with the new port (e.g. localhost:12344 ) and re-run.
+3. Some organisations do not allow direct download of docker images from dockerhub. You may need to tweak the redis image name to point to a reachable docker repo mirror.
 
 # Environment variables
 
