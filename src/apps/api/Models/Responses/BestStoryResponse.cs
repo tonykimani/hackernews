@@ -6,11 +6,11 @@ namespace api.Models.Responses
     /// Client facing story (renames some of the properties from HackerNews)
     /// We could avoid having to have this by using GraphQL but you asked for REST
     /// </summary>
-    public class StoryResponse
+    public class BestStoryResponse
     {
         private readonly NewsStory _story;
 
-        public StoryResponse(NewsStory story)
+        public BestStoryResponse(NewsStory story)
         {
             _story = story;
         }

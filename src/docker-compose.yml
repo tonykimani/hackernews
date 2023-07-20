@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  cache:
+    image: redis
+    hostname: cache
+    ports:
+     - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+      
+
+  api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: hnhelper/api
+    environment:
+      REDIS_SERVER: cache
+    ports:
+      - 5134:80
+    depends_on:
+      cache:
+       condition: service_healthy
+    healthcheck:
+       test: ["CMD-SHELL", "curl -f http://localhost/health/hello || exit 1"]
+    
+  
+     
+
+   
+
+
+
+ 

@@ -3,6 +3,7 @@ using libs.contracts;
 using libs.Contracts;
 using libs.Models;
 using libs.Utils;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -15,11 +16,38 @@ namespace api.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ICache _cache;
-        
-        public HackerNewsService(HttpClient httpClient, ICache cache)
+        private static int _maxRequests;
+        private readonly int _maxStoryAgeDays;
+        private static SemaphoreSlim _throttle;
+        private static readonly object _syncLock = new object();
+
+        public HackerNewsService(HttpClient httpClient, ICache cache,IConfiguration configuration)
         {
             _httpClient = httpClient;
             _cache = cache;
+
+            _maxRequests = configuration.GetValue("MAX_CONCURRENT_REQUESTS", 5);
+            _maxStoryAgeDays = configuration.GetValue("MAX_STORY_AGE_DAYS", 7);
+        }
+
+        static SemaphoreSlim Throttle
+        {
+            get
+            {
+                if (_throttle == null)
+                {
+                    lock (_syncLock)
+                    {
+                        if (_throttle == null)
+                        {
+                            _throttle = new SemaphoreSlim(_maxRequests);
+                        }
+                    }
+                }
+
+                return _throttle;
+
+            }
         }
 
         /// <summary>
@@ -30,11 +58,14 @@ namespace api.Services
         {
             try
             {
-                var result = await _httpClient.GetAsync("/");
-
-                if (result.IsSuccessStatusCode)
+                using (new ThrottleUtils(Throttle))
                 {
-                    return true;
+                    var result = await _httpClient.GetAsync("/");
+
+                    if (result.IsSuccessStatusCode)
+                    {
+                        return true;
+                    }
                 }
 
             }
@@ -42,7 +73,7 @@ namespace api.Services
             {
                 Log.Debug($"Failed while pinging hacker news .{ex.Message}.{ex.StackTrace}", ex);
             }
-
+             
             return false;
         }
 
@@ -54,15 +85,20 @@ namespace api.Services
 
                 if (string.IsNullOrEmpty(storyIdsJson))
                 {
-                    var response = await _httpClient.GetAsync("v0/beststories.json");
+                    HttpResponseMessage response;
+
+                    using (new ThrottleUtils(Throttle))
+                    {
+                        response = await _httpClient.GetAsync("v0/beststories.json");
+                    }
 
                     if (response.IsSuccessStatusCode)
                     {
                         storyIdsJson = await response.Content.ReadAsStringAsync();
 
-                        var hoursToUTCMidnight = (DateTimeOffset.UtcNow.Midnight() - DateTimeOffset.UtcNow);
+                        var hoursToMidnight = (DateTimeOffset.Now.Midnight() - DateTimeOffset.Now);
 
-                        await _cache.SetKey(KeyNames.STORIES, storyIdsJson, hoursToUTCMidnight);
+                        await _cache.SetKey(KeyNames.STORIES, storyIdsJson, hoursToMidnight);
                         
                     }
                     else
@@ -98,15 +134,20 @@ namespace api.Services
 
                 var storyJson = _cache.GetKey(storyCacheId);
 
-                if (storyJson == null)
+                if (string.IsNullOrEmpty(storyJson))
                 {
-                    var response = await _httpClient.GetAsync($"v0/item/{storyId}.json");
+                    HttpResponseMessage response;
+
+                    using (new ThrottleUtils(Throttle))
+                    {
+                        response = await _httpClient.GetAsync($"v0/item/{storyId}.json");
+                    }
 
                     if (response.IsSuccessStatusCode)
                     {
                         storyJson = await response.Content.ReadAsStringAsync();
 
-                        await _cache.SetKey(KeyNames.STORIES, storyJson, TimeSpan.FromDays(7));
+                        await _cache.SetKey(storyCacheId, storyJson, TimeSpan.FromDays(_maxStoryAgeDays));
                     }
                     else
                     {

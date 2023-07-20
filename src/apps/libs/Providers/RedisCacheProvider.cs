@@ -15,13 +15,14 @@ namespace libs.Providers
 
         public RedisCacheProvider(IConfiguration config)
         {
-            Log.Information($"connecting to redis at {config["redis"]}");
+            var servers = config.GetValue<string>("REDIS_SERVER", "localhost");
+            Log.Information($"connecting to redis at {servers}");
             
             _maxPingTimeSeconds = config.GetValue("MAX_REDIS_PING_TIME_SECONDS", 30.0);
 
-            var options = ConfigurationOptions.Parse(config.GetValue<string>("redis"));
-            options.Password = config.GetValue<string>("redispwd");
-            options.Ssl = config.GetValue<bool>("redisssl");
+            var options = ConfigurationOptions.Parse(servers);
+            options.Password = config.GetValue<string>("REDIS_PWD","");
+            options.Ssl = config.GetValue<bool>("REDIS_SSL",false);
             options.AbortOnConnectFail = false;
             options.ConnectRetry = 10;
             

@@ -5,7 +5,8 @@
       "launchBrowser": true,
       "launchUrl": "",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "REDIS_SERVER": "localhost"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5134"
@@ -24,7 +25,7 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/",
       "publishAllPorts": true,
-      "useSSL": true
+      "useSSL": false
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json",

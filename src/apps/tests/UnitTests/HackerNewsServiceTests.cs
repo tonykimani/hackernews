@@ -3,6 +3,7 @@ using libs.Constants;
 using libs.contracts;
 using libs.Contracts;
 using libs.Models;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json;
@@ -17,19 +18,23 @@ namespace tests.UnitTests
         private Mock<ICache> _mockCache;
         private Mock<HttpMessageHandler> _mockMessageHandler;
         private INewsService _hackerNews;
- 
+        
+
         [SetUp]
         public void SetUp()
         {
             
-            _mockCache = new Mock<ICache>();
-
+            _mockCache = new Mock<ICache>();            
             _mockMessageHandler = new Mock<HttpMessageHandler>();
 
             var httpClient = new HttpClient(_mockMessageHandler.Object);
             httpClient.BaseAddress = new Uri("http://unittests.local");
 
-            _hackerNews = new HackerNewsService(httpClient, _mockCache.Object); 
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection()
+                .Build();
+
+            _hackerNews = new HackerNewsService(httpClient, _mockCache.Object, configuration); 
         }
 
         

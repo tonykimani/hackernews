@@ -1,6 +1,8 @@
 using api.Services;
+using libs.contracts;
 using libs.Contracts;
 using libs.Converters;
+using libs.Providers;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -53,6 +55,8 @@ builder.Services.AddHttpClient<INewsService, HackerNewsService>(client =>
     client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<double>("TIMEOUT_SECONDS", 60));
 
 }).AddPolicyHandler(GetRetryPolicy());
+
+builder.Services.AddSingleton<ICache, RedisCacheProvider>();
     
 
 var app = builder.Build();
@@ -73,6 +77,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+Log.Information("Starting up API..");
 app.Run();
 
 /// Generically handle transient network issues with http client 
