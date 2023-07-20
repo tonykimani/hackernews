@@ -25,7 +25,7 @@ services:
       - 5134:80
     depends_on:
       cache:
-       condition: service_healthy
+       condition: service_started
     healthcheck:
        test: ["CMD-SHELL", "curl -f http://localhost/health/hello || exit 1"]
     
